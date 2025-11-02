@@ -42,4 +42,14 @@ public class WinningStatistics {
         totalPrizeMoney += (long) rankCounts.get(Ranking.FIFTH) * Ranking.FIFTH.getPrizeMoney();
         return totalPrizeMoney;
     }
+
+    public double calculateRateOfReturn(int purchaseAmount) {
+        long totalPrizeMoney = calculateTotalPrizeMoney();
+        double rateOfReturn = (double) totalPrizeMoney / purchaseAmount * 100;
+        return roundToFirstDecimalPlace(rateOfReturn);
+    }
+
+    private double roundToFirstDecimalPlace(double value) {
+        return Math.round(value * 10) / 10.0;
+    }
 }
