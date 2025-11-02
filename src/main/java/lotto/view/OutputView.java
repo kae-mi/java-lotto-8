@@ -74,4 +74,8 @@ public class OutputView {
         System.out.printf(RATE_OF_RETURN_MESSAGE, rateOfReturn);
         System.out.println();
     }
+
+    public void printErrorMessage(String message) {
+        System.out.println(message);
+    }
 }

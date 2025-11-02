@@ -6,6 +6,7 @@ import lotto.view.OutputView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class LottoController {
     private final InputView inputView;
@@ -18,69 +19,53 @@ public class LottoController {
 
     public void run() {
         LottoPurchaseAmount purchaseAmount = inputPurchaseAmount();
-        LottoPaper lottoPaper = generateAndPrintLottoPaper(purchaseAmount);
+        LottoPaper lottoPaper = generateLottoPaper(purchaseAmount);
+        printLottoPaper(lottoPaper);
 
         Lotto winningNumbers = inputWinningNumbers();
         BonusNumber bonusNumber = inputBonusNumber(winningNumbers);
 
-        printWinningResult(lottoPaper, winningNumbers, bonusNumber, purchaseAmount);
+        WinningStatistics statistics = calculateWinningStatistics(lottoPaper, winningNumbers, bonusNumber);
+        printWinningStatistics(statistics, purchaseAmount);
     }
 
     private LottoPurchaseAmount inputPurchaseAmount() {
-        while (true) {
-            try {
-                String input = inputView.readPurchaseAmount();
-                return new LottoPurchaseAmount(input);
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
-            }
-        }
+        return retryOnException(() -> {
+            String input = inputView.readPurchaseAmount();
+            return new LottoPurchaseAmount(input);
+        });
     }
 
-    private LottoPaper generateAndPrintLottoPaper(LottoPurchaseAmount purchaseAmount) {
+    private LottoPaper generateLottoPaper(LottoPurchaseAmount purchaseAmount) {
         int lottoCount = purchaseAmount.calculatePurchasableLottoCount();
-        LottoPaper lottoPaper = LottoPaper.generateLottoPaperByLottoCount(lottoCount);
+        return LottoPaper.generateLottoPaperByLottoCount(lottoCount);
+    }
 
+    private void printLottoPaper(LottoPaper lottoPaper) {
         outputView.printPurchaseCount(lottoPaper.getLottoCountInPaper());
         outputView.printLottoPaper(lottoPaper);
-
-        return lottoPaper;
     }
 
     private Lotto inputWinningNumbers() {
-        while (true) {
-            try {
-                String input = inputView.readWinningNumbers();
-                return inputView.parseWinningNumbers(input);
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
-            }
-        }
+        return retryOnException(() -> {
+            String input = inputView.readWinningNumbers();
+            return inputView.parseWinningNumbers(input);
+        });
     }
 
     private BonusNumber inputBonusNumber(Lotto winningNumbers) {
-        while (true) {
-            try {
-                String input = inputView.readBonusNumber();
-                BonusNumber bonusNumber = new BonusNumber(input);
-                bonusNumber.validateBonusNumberNotDuplicateWithWinningNumbers(winningNumbers);
-                return bonusNumber;
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
-            }
-        }
+        return retryOnException(() -> {
+            String input = inputView.readBonusNumber();
+            BonusNumber bonusNumber = new BonusNumber(input);
+            bonusNumber.validateBonusNumberNotDuplicateWithWinningNumbers(winningNumbers);
+            return bonusNumber;
+        });
     }
 
-    private void printWinningResult(LottoPaper lottoPaper, Lotto winningNumbers,
-                                    BonusNumber bonusNumber, LottoPurchaseAmount purchaseAmount) {
+    private WinningStatistics calculateWinningStatistics(LottoPaper lottoPaper, Lotto winningNumbers, BonusNumber bonusNumber) {
         LottoMatcher matcher = new LottoMatcher(winningNumbers, bonusNumber);
         List<Ranking> rankings = calculateRankings(lottoPaper, matcher);
-
-        WinningStatistics statistics = new WinningStatistics(rankings);
-        outputView.printWinningStatistics(statistics);
-
-        double rateOfReturn = statistics.calculateRateOfReturn(purchaseAmount.getAmount());
-        outputView.printRateOfReturn(rateOfReturn);
+        return new WinningStatistics(rankings);
     }
 
     private List<Ranking> calculateRankings(LottoPaper lottoPaper, LottoMatcher matcher) {
@@ -90,5 +75,21 @@ public class LottoController {
             rankings.add(ranking);
         }
         return rankings;
+    }
+
+    private void printWinningStatistics(WinningStatistics statistics, LottoPurchaseAmount purchaseAmount) {
+        outputView.printWinningStatistics(statistics);
+        double rateOfReturn = statistics.calculateRateOfReturn(purchaseAmount.getAmount());
+        outputView.printRateOfReturn(rateOfReturn);
+    }
+
+    private <T> T retryOnException(Supplier<T> supplier) {
+        while (true) {
+            try {
+                return supplier.get();
+            } catch (IllegalArgumentException e) {
+                outputView.printErrorMessage(e.getMessage());
+            }
+        }
     }
 }
