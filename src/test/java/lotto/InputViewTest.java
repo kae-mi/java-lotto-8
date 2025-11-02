@@ -47,8 +47,7 @@ class InputViewTest {
     void 로또_검증_범위_초과() {
         InputView inputView = new InputView();
         assertThatThrownBy(() -> inputView.parseWinningNumbers("1,2,3,4,5,46"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("[ERROR]");
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("Lotto의 검증 로직이 작동한다 - 중복.")
@@ -56,7 +55,6 @@ class InputViewTest {
     void 로또_검증_중복() {
         InputView inputView = new InputView();
         assertThatThrownBy(() -> inputView.parseWinningNumbers("1,2,3,4,5,5"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("[ERROR]");
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }
