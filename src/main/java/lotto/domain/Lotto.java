@@ -2,6 +2,7 @@ package lotto.domain;
 
 import camp.nextstep.edu.missionutils.Randoms;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -16,8 +17,7 @@ public class Lotto {
 
     public Lotto(List<Integer> numbers) {
         validate(numbers);
-        sortNumbersByAscendingOrder(numbers);
-        this.numbers = numbers;
+        this.numbers = sortNumbersByAscendingOrder(numbers);
     }
 
     private void validate(List<Integer> numbers) {
@@ -44,8 +44,10 @@ public class Lotto {
         }
     }
 
-    private void sortNumbersByAscendingOrder(List<Integer> numbers) {
-        Collections.sort(numbers);
+    private List<Integer> sortNumbersByAscendingOrder(List<Integer> numbers) {
+        List<Integer> sortedNumbers = new ArrayList<>(numbers);
+        Collections.sort(sortedNumbers);
+        return sortedNumbers;
     }
 
     public static Lotto generateRandomLotto() {
