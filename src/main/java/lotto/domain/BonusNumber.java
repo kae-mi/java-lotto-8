@@ -6,9 +6,9 @@ public class BonusNumber {
 
     private final int number;
 
-    public BonusNumber(String input, Lotto winningNumbers) {
+    public BonusNumber(String input) {
         int parsedNumber = parseInputToBonusNumber(input);
-        validateBonusNumber(parsedNumber, winningNumbers);
+        validateBonusNumberRange(parsedNumber);
         this.number = parsedNumber;
     }
 
@@ -20,18 +20,13 @@ public class BonusNumber {
         }
     }
 
-    private void validateBonusNumber(int number, Lotto winningNumbers) {
-        validateBonusNumberRange(number);
-        validateBonusNumberNotDuplicateWithWinningNumbers(number, winningNumbers);
-    }
-
     private void validateBonusNumberRange(int number) {
         if (number < MIN_LOTTO_NUMBER || number > MAX_LOTTO_NUMBER) {
             throw new IllegalArgumentException("[ERROR] 보너스 번호는 1부터 45 사이의 숫자여야 합니다.");
         }
     }
 
-    private void validateBonusNumberNotDuplicateWithWinningNumbers(int number, Lotto winningNumbers) {
+    public void validateBonusNumberNotDuplicateWithWinningNumbers(Lotto winningNumbers) {
         if (winningNumbers.getNumbers().contains(number)) {
             throw new IllegalArgumentException("[ERROR] 보너스 번호는 당첨 번호와 중복될 수 없습니다.");
         }
